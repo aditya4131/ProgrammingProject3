@@ -40,7 +40,6 @@ public class GraphDemo
       int menuReturnValue, i,j;
       Function<City,PrintStream> f = aCity -> System.out.printf("%-2d  %-30s%n",aCity.getKey(),aCity.getLabel().trim());      
       Graph<City> g = readGraph(args[0]);      
-      Graph<City> gComp = complement(g);
       long s = g.size();
       menuReturnValue = -1;
       while (menuReturnValue != 0)
@@ -344,7 +343,7 @@ public class GraphDemo
     * vertex, root. If no such MST exists, then it generates a minimum
     * spanning forest.
     * @param g a weighted undirected graph
-    * @param r root of the minimum spanning tree, when one exists.
+    * @param root root of the minimum spanning tree, when one exists.
     * @param parent the parent implementation of the minimum spanning tree/forest
     * @return the weight of such a tree or forest.
     * @throws GraphException when this graph is empty
