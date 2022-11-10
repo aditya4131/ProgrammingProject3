@@ -319,7 +319,8 @@ public class GraphDemo
    {
 	   //Implement this method
 	   
-	   return false;  
+	   //return false; //uncomment this statement and remove the null during implementation
+       return null;
    }
    
     /**
@@ -333,8 +334,36 @@ public class GraphDemo
     */
    private static void floyd(Graph<City> g, double dist[][], int path[][]) throws GraphException
    {
-      //implement this method.
+      int i, j , k;
+      City mamma, papa;
 
+       for (i = 0; i <g.size(); i++) {
+           mamma = g.retrieveVertex(new City(i + 1));
+           for (j = 0; j < g.size(); j++) {
+               papa = g.retrieveVertex(new City(j + 1));
+                path[i][j] = 0;
+                if(i == j){
+                    dist[i][j] = 0;
+                } else if (g.isEdge(papa, mamma) == true) {
+                    dist[i][j] = g.retrieveEdge(mamma,papa);
+                } else {
+                    dist[i][j] = INFINITY;
+                }
+           }
+       }
+
+       for(k = 0; k < g.size(); k++) {
+           for ( i = 0; i < g.size(); i++) {
+               for(j = 0; j < g.size(); j++){
+                   if(dist[i][j] != INFINITY && dist[k][j] != INFINITY){
+                       if(dist[i][j] > (dist[i][k] + dist[k][j])){
+                           dist[i][j] = dist[i][k] + dist[k][j];
+                           path[i][j] = k;
+                       }
+                   }
+               }
+           }
+       }
    }               
    
   
