@@ -390,19 +390,30 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
     /***------------------  BEGIN AUGEMENTED METHOD ----------------***/
     @Override
     public boolean isEdge(E fromKey, E toKey) {
-        double isPresent;
+//
+        Boolean E = false;
 
-        if (fromKey != null || toKey != null) {
-            try {
-                isPresent = retrieveEdge(fromKey, toKey);
-                if (isPresent != 0) {
-                    return true;
-                }
-            } catch (GraphException e) {
-                throw new RuntimeException(e);
-            }
+        Double g;
+
+        try{
+
+            g = retrieveEdge(fromKey, toKey);
+
+            if(g != 0)
+
+                E = true;
+
+        } catch (GraphException ex) {
+
+            E = false;
+
         }
-        return false;
+
+
+
+        return E;
+
+
     }
 
     @Override

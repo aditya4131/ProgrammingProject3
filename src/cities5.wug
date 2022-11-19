@@ -1,7 +1,7 @@
 p 12 16
 
 c  This a weighted undirected graph consists of 
-C  12 vertices and 16 edges. It consists of two components
+c  12 vertices and 16 edges. It consists of two components
 c  city5.wdg
 
 c vertices

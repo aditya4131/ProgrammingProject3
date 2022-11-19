@@ -15,12 +15,13 @@
  * </pre>
  */
 
+import javax.sound.sampled.Line;
 import java.io.*;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.Comparator;
-import java.util.PriorityQueue; 
+import java.util.PriorityQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class GraphDemo
@@ -41,6 +42,14 @@ public class GraphDemo
       Function<City,PrintStream> f = aCity -> System.out.printf("%-2d  %-30s%n",aCity.getKey(),aCity.getLabel().trim());      
       Graph<City> g = readGraph(args[0]);      
       long s = g.size();
+
+      /* testing */
+//       int [] comps = new int [(int)g.size()];
+//       int resul = getComponents(g, comps);
+//       System.out.println("testing : " + resul);
+
+
+
       menuReturnValue = -1;
       while (menuReturnValue != 0)
       {
@@ -55,7 +64,8 @@ public class GraphDemo
                // Output should be aligned in two-column format as illustrated below:
                // 1     Charlottetown
                // 4     Halifax
-               // 2     Edmonton     
+               // 2     Edmonton
+                g.bfsTraverse(f);
 
                System.out.println("==========================================================================");
                System.out.println();
@@ -66,7 +76,7 @@ public class GraphDemo
                // 1     Charlottetown
                // 4     Halifax
                // 2     Edmonton     
-
+                g.dfsTraverse(f);
                System.out.println("==========================================================================");
                System.out.println();
                System.out.println();
@@ -74,9 +84,12 @@ public class GraphDemo
             case 2: //Connected Components of G                 
                  System.out.println();
                  System.out.println("Connected Components in "+args[0]);
-                 System.out.println();      
+                 System.out.println();
+
                  if (g.size() > 0) 
                  {
+
+
                      //Add code here to print the list of cities in each component of the graph.
                      //For example:
                      //*** Component # 1 ***
@@ -317,10 +330,31 @@ public class GraphDemo
     */
    private static int[] isBipartite(Graph<City> g, AtomicBoolean bipartite) throws GraphException
    {
-	   //Implement this method
-	   
-	   //return false; //uncomment this statement and remove the null during implementation
-       return null;
+       int size = (int) g.size();
+       int [] part1 = new int [size];
+       Arrays.fill(part1, -1);
+       int [] part2 = new int [size];
+       bipartite.set(true);
+
+       for (int i = 0; i < size - 1; i++) {
+           if(part1[i] == -1) {
+               part1[i] = 0;
+           }
+           for (int j = i + 1; j < size; j++) {
+               part1[j] += part2[j];
+               if(g.isEdge(new City(i), new City(j))){
+                   if(part1[i] == part2[j]){
+                       bipartite.set(false);
+                   } else {
+                       return null;
+                   }
+                   if(part2[j] == -1){
+                       part2[j] = (part1[i] +1) % 2;
+                   }
+               }
+           }
+       }
+	   return part1;
    }
    
     /**
@@ -334,7 +368,7 @@ public class GraphDemo
     */
    private static void floyd(Graph<City> g, double dist[][], int path[][]) throws GraphException
    {
-      int i, j , k;
+      int i, j, k;
       City mamma, papa;
 
        for (i = 0; i <g.size(); i++) {
@@ -447,13 +481,36 @@ public class GraphDemo
     * key to component number: if components[i] = k, then
     * city i+1 is in component k.
     * @return the number of components in this graph
-    * @throws GraphException 
+    * @throws GraphException
     */
-   private static int getComponents(Graph<City> g, int components[]) throws GraphException
+   private static int getComponents(Graph<City> g, int [] components) throws GraphException
    {
-      //Implement this method
-	  
-      return 0;
+       int vc = 0, cc = 0;
+       int w, v;
+       int [] cmp = new int[(int) g.size()];
+       Arrays.fill(cmp,0);
+       Queue<Integer> pq = new LinkedList<>();
+       while( vc < g.size()) {
+           cc++;
+           v = 1;
+           while(cmp[v - 1] != 0){
+               v++;
+               pq.add(v);
+               cmp[v - 1] = cc;
+               vc++;
+               while(!pq.isEmpty()) {
+                   w = pq.poll();
+                   for(int j = w + 1; j < g.size(); j++){
+                       if(g.isEdge(new City(w), new City(j)) && cmp[j-1] == 0){
+                           pq.add(j);
+                           cmp[j-1] = cc;
+                           vc++;
+                       }
+                   }
+               }
+           }
+       }
+       return cc;
    }
 }
 
