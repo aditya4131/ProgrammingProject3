@@ -331,30 +331,29 @@ public class GraphDemo
    private static int[] isBipartite(Graph<City> g, AtomicBoolean bipartite) throws GraphException
    {
        int size = (int) g.size();
-       int [] part1 = new int [size];
-       Arrays.fill(part1, -1);
-       int [] part2 = new int [size];
+       int [] mainPart = new int[(int) g.size() + 1];
+       //int [] part1 = new int [size];
+       Arrays.fill(mainPart, -1);
+//       int [] part2 = new int [size];
        bipartite.set(true);
 
-       for (int i = 0; i < size - 1; i++) {
-           if(part1[i] == -1) {
-               part1[i] = 0;
+       for (int i = 1; i <= size - 1; i++) {
+           if(mainPart[i] == -1) {
+               mainPart[i] = 0;
            }
            for (int j = i + 1; j < size; j++) {
-               part1[j] += part2[j];
                if(g.isEdge(new City(i), new City(j))){
-                   if(part1[i] == part2[j]){
+                   if(mainPart[i] == mainPart[j]){
                        bipartite.set(false);
-                   } else {
                        return null;
                    }
-                   if(part2[j] == -1){
-                       part2[j] = (part1[i] +1) % 2;
+                   if(mainPart[j] == -1){
+                       mainPart[j] = (mainPart[i] +1) % 2;
                    }
                }
            }
        }
-	   return part1;
+	   return mainPart;
    }
    
     /**
@@ -420,58 +419,106 @@ public class GraphDemo
     * }
     * </pre>
     */ 
-   private static double  primMST(Graph<City> g, int root, int [] parent) throws GraphException
-   {
-      //implement this method
-      int i;
-      if (g.isEmpty())
-          throw new GraphException("Empty graph in call to primMST()");
-      if (!g.isVertex(new City(root)))
-          throw new GraphException("Non-existent root in call to primMST()");
-      int numVertices = (int)g.size();
-      double[] dist = new double[numVertices];
-      boolean[] processed = new boolean[numVertices];
-      for (i=0; i< numVertices; i++) 
-      {
-          dist[i] = INFINITY;
-          parent[i] = -1;
-      }
-      dist[root - 1] = 0;
-      double totalWeight = 0;
-      class Node
-      {
-          public int parent, id;
-          public double key;
-          public Node()
-          {
-              
-          }
-          public Node(int p, int v, double k)
-          {
-              parent = p;
-              id = v;
-              key = k;
-          }           
-      }
+   private static double  primMST(Graph<City> g, int root, int [] parent) throws GraphException{
+       //implement this method
 
-      Comparator<Node> cmp = (v1, v2) -> 
-      {
-          double d = v1.key - v2.key;
-          if (d < 0)
-              return -1;
-          if (d > 0)
-              return 1;
-          d = v1.id - v2.id;
-          if (d < 0)
-              return -1;
-          if (d > 0)
-              return 1;
-          return 0;           
-      };
-      //Define an instance of the PriorityQueue class that uses the comparator;
-      //Then implement the priority-queue-based Prim's MST algorithm
-	  
-      return 0;                 
+       int i;
+       if (g.isEmpty())
+           throw new GraphException("Empty graph in call to primMST()");
+       if (!g.isVertex(new City(root)))
+           throw new GraphException("Non-existent root in call to primMST()");
+       int numVertices = (int) g.size();
+       double[] dist = new double[numVertices + 1];
+       boolean[] processed = new boolean[numVertices];
+       for (i = 0; i < numVertices; i++) {
+           //dist[i] = INFINITY;
+           parent[i] = -1;
+       }
+       Arrays.fill(dist, INFINITY);
+       dist[root - 1] = 0;
+       double totalWeight = 0;
+       class Node {
+           public int parent, id;
+           public double key;
+
+           public Node() {
+
+           }
+
+           public Node(int p, int v, double k) {
+               parent = p;
+               id = v;
+               key = k;
+           }
+       }
+
+       Comparator<Node> cmp = (v1, v2) ->
+       {
+           double d = v1.key - v2.key;
+           if (d < 0)
+               return -1;
+           if (d > 0)
+               return 1;
+           d = v1.id - v2.id;
+           if (d < 0)
+               return -1;
+           if (d > 0)
+               return 1;
+           return 0;
+       };
+
+       PriorityQueue<Node> pq = new PriorityQueue<>(cmp);
+       boolean[] vertexInTree = new boolean[(int) g.size() + 1];
+       Arrays.fill(vertexInTree, false);
+       int vCount = 0;
+
+       int weightOfTree = 0;
+
+       for (int j = 0; j < numVertices; j++) {
+           pq.add(new Node(-1, i, INFINITY));
+       }
+       pq.add(new Node(-1, root, 0));
+
+       int[] msTree = new int[(int) g.size()];
+       Arrays.fill(msTree, -1);
+
+       while (vCount < numVertices) {
+           Node u = pq.remove();
+           while (vertexInTree[ u.id ] == true) {
+               u = pq.remove();
+           }
+           vCount++;
+           msTree[u.id - 1] = u.parent;
+           if (msTree[u.id - 1] == -1) {
+               u.key = 0;
+           }
+           dist[u.id] = u.key;
+           weightOfTree += u.key;
+           for (int v = 1; v <= numVertices; v++) {
+               if (g.isEdge(new City(u.id), new City(v)) && vertexInTree[v] == false) {
+                   if (g.retrieveEdge(new City(u.id), new City(v)) < dist[v]) {
+                       dist[v] = g.retrieveEdge(new City(u.id), new City(v));
+                       msTree[v - 1] = u.id;
+                       pq.add(new Node(u.id, v, dist[v]));
+                    }
+                   } else if (g.isEdge(new City(v), new City(u.id)) && vertexInTree[v] == false) {
+                       if (g.retrieveEdge(new City(v), new City(u.id)) < dist[v]) {
+                           dist[v] = g.retrieveEdge(new City(v), new City(u.id));
+                           msTree[v - 1] = u.id;
+                           pq.add(new Node(u.id, v, dist[v]));
+                       }
+                   }
+               }
+       }
+
+       //Define an instance of the PriorityQueue class that uses the comparator;
+       //Then implement the priority-queue-based Prim's MST algorithm
+
+       for (int j = 0; j < numVertices; j++) {
+           parent[j] = msTree[j];
+       }
+
+       return weightOfTree;
    }         
    
    /**
