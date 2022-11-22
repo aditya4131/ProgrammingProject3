@@ -390,77 +390,83 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
     /***------------------  BEGIN AUGEMENTED METHOD ----------------***/
     @Override
     public boolean isEdge(E fromKey, E toKey) {
-//
-        Boolean E = false;
-
-        Double g;
-
+        Boolean isEdge = false;
+        Double edgeVal;
         try{
-
-            g = retrieveEdge(fromKey, toKey);
-
-            if(g != 0)
-
-                E = true;
-
+            edgeVal = retrieveEdge(fromKey, toKey);
+            if(edgeVal != 0)
+                isEdge = true;
         } catch (GraphException ex) {
-
-            E = false;
-
+            isEdge = false;
         }
-
-
-
-        return E;
-
-
+        return isEdge;
     }
 
     @Override
     public boolean isPath(E fromKey, E toKey) {
-        Queue<Vertex> queue = new LinkedList<>();
-//        E tmpKey = fromKey;
-//        Edge tmpEdge;
-//        Vertex tmp = first;
-//        while (tmp != null) {
-//            if (tmp.data.equals(tmpKey)) {
-//                tmpEdge = tmp.pEdge;
-//                while (tmpEdge != null) {
-//                    queue.add(tmpEdge.destination);
-//                    tmpEdge = tmpEdge.pNextEdge;
-//                }
-//                tmp = first;
-//                tmpKey = queue.remove(0).data;
-//                if (tmpKey.equals(toKey))
-//                    return true;
-//            }
-//            tmp = tmp.pNextVertex;
-//        }
-        queue.add(first);
-        Set<E> present = new HashSet<>();
-        present.add(first.data);
-
-        while(!queue.isEmpty()){
-            Vertex temp = queue.poll();
-            if(temp.data.equals(toKey)){
-                return true;
-            } else {
-                if(first.pNextVertex != null) {
-                    queue.add(first.pNextVertex);
-                    present.add(first.pNextVertex.data);
-                } // check this part of the algo
+        Vertex tmpFrom = first;
+        Vertex src = null;
+        while (tmpFrom != null && cmp.compare(fromKey, tmpFrom.data) > 0)
+            tmpFrom = tmpFrom.pNextVertex;
+        if (tmpFrom == null || cmp.compare(fromKey, tmpFrom.data) != 0) {
+            return false;
+        }
+        /* verify that the dest vertex exists in the graph */
+        Vertex tmpTo = first;
+        while (tmpTo != null && cmp.compare(toKey, tmpTo.data) > 0)
+            tmpTo = tmpTo.pNextVertex;
+        if (tmpTo == null || cmp.compare(toKey, tmpTo.data) != 0) {
+            return false;
+        }
+        /* locate the src vertex to find the start of our traversal */
+        Vertex walkPtr = tmpFrom;
+        while (walkPtr != null) {
+            walkPtr.processed = 0;
+            if (walkPtr.data.compareTo(fromKey) == 0) {
+                src = walkPtr;
             }
+            walkPtr = walkPtr.pNextVertex;
+        }
+        Stack<Vertex> stack = new Stack<>();
+        Vertex toPtr;
+        Edge edgeWalk;
+        Vertex tmp;
+        walkPtr = src;
+        stack.push(walkPtr);
+        while (!stack.isEmpty()) {
+            tmp = stack.peek();
+            edgeWalk = tmp.pEdge;
+            while (edgeWalk != null) {
+                toPtr = edgeWalk.destination;
+                if (toPtr.processed == 0) {
+                    if (toPtr.data.compareTo(toKey) == 0) {
+                        return true;
+                    }
+                    toPtr.processed = 1;
+                    stack.push(toPtr);
+                    edgeWalk = toPtr.pEdge;
+                } else
+                    edgeWalk = edgeWalk.pNextEdge;
+            }
+            tmp = stack.pop();
+            tmp.processed = 2;
         }
         return false;
     }
 
     @Override
     public long countEdges() {
-        //implement this method
-
-        return 0;
+        int totalCount = 0;
+        Vertex First = first;
+        while (First != null) {
+            totalCount += First.outDeg;
+            First = First.pNextVertex;
+        }
+//        if (First == null) {
+//            throw new NullPointerException();
+//        }
+        return totalCount;
     }
-
     /***------------------  END AUGEMENTED METHOD ----------------***/
 
     @Override
