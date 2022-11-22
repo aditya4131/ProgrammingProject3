@@ -36,16 +36,11 @@ public class GraphDemo {
         }
         City c1, c2;
         Scanner console;
-        int menuReturnValue, i, j;
+        int menuReturnValue, i, x;
         Function<City, PrintStream> f = aCity -> System.out.printf("%-2d  %-30s%n", aCity.getKey(),
                 aCity.getLabel().trim());
         Graph<City> g = readGraph(args[0]);
         long s = g.size();
-
-        /* testing */
-        // int [] comps = new int [(int)g.size()];
-        // int resul = getComponents(g, comps);
-        // System.out.println("testing : " + resul);
 
         menuReturnValue = -1;
         while (menuReturnValue != 0) {
@@ -123,8 +118,8 @@ public class GraphDemo {
                     System.out.printf("Enter the source vertex: ");
                     i = console.nextInt();
                     System.out.printf("Enter the destination vertex: ");
-                    j = console.nextInt();
-                    if (g.isPath(new City(i), new City(j)) && g.isPath(new City(j), new City(i))) {
+                    x = console.nextInt();
+                    if (g.isPath(new City(i), new City(x)) && g.isPath(new City(x), new City(i))) {
                         int dest;
                         double[][] cost = new double[(int) g.size()][(int) g.size()];
                         int[][] path = new int[(int) g.size()][(int) g.size()];
@@ -132,7 +127,7 @@ public class GraphDemo {
                         floyd(g, cost, path);
                         System.out.printf("Shortest round trip from %s to %s:%n",
                                 g.retrieveVertex(new City(i)).getLabel().trim(),
-                                g.retrieveVertex(new City(j)).getLabel().trim());
+                                g.retrieveVertex(new City(x)).getLabel().trim());
                         System.out.println(
                                 "=========================================================================================");
                         // Add code here to print each leg of the trip from the source to the
@@ -153,35 +148,35 @@ public class GraphDemo {
                         // Distance: 51.00 mi
                         //
 
-                        String src = g.retrieveVertex(new City(i)).getLabel().trim();
-                        String target = g.retrieveVertex(new City(j)).getLabel().trim();
+                        String starting = g.retrieveVertex(new City(i)).getLabel().trim();
+                        String ending = g.retrieveVertex(new City(x)).getLabel().trim();
 
-                        int nxt = i;
-                        System.out.printf("%s -> %s:%n", src, target);
-                        while (nxt != j) {
+                        int temp = i;
+                        System.out.printf("%s -> %s:%n", starting, ending);
+                        while (temp != x) {
                             System.out.printf("%-2s -> %-2s %.2f mi%n",
-                                    g.retrieveVertex(new City(nxt)).getLabel().trim(),
-                                    g.retrieveVertex(new City(path[nxt - 1][j - 1])).getLabel().trim(),
-                                    g.retrieveEdge(new City(nxt), new City(path[nxt - 1][j - 1])));
-                            nxt = path[nxt - 1][j - 1];
+                                    g.retrieveVertex(new City(temp)).getLabel().trim(),
+                                    g.retrieveVertex(new City(path[temp - 1][x - 1])).getLabel().trim(),
+                                    g.retrieveEdge(new City(temp), new City(path[temp - 1][x - 1])));
+                            temp = path[temp - 1][x - 1];
                         }
-                        System.out.printf("Distance: %.2f mi%n%n", cost[i - 1][j - 1]);
-                        System.out.printf("%s -> %s:%n", target, src);
-                        nxt = j;
-                        while (nxt != i) {
+                        System.out.printf("Distance: %.2f mi%n%n", cost[i - 1][x - 1]);
+                        System.out.printf("%s -> %s:%n", ending, starting);
+                        temp = x;
+                        while (temp != i) {
                             System.out.printf("%-2s -> %-2s %.2f mi%n",
-                                    g.retrieveVertex(new City(nxt)).getLabel().trim(),
-                                    g.retrieveVertex(new City(path[nxt - 1][i - 1])).getLabel().trim(),
-                                    g.retrieveEdge(new City(nxt), new City(path[nxt - 1][i - 1])));
-                            nxt = path[nxt - 1][i - 1];
+                                    g.retrieveVertex(new City(temp)).getLabel().trim(),
+                                    g.retrieveVertex(new City(path[temp - 1][i - 1])).getLabel().trim(),
+                                    g.retrieveEdge(new City(temp), new City(path[temp - 1][i - 1])));
+                            temp = path[temp - 1][i - 1];
                         }
-                        System.out.printf("Distance: %.2f mi%n", cost[j - 1][i - 1]);
+                        System.out.printf("Distance: %.2f mi%n", cost[x - 1][i - 1]);
 
                         // End code
                         System.out.println(
                                 "=========================================================================================");
                         System.out.printf("Round Trip Distance: %.2f miles.%n%n",
-                                cost[i - 1][j - 1] + cost[j - 1][i - 1]);
+                                cost[i - 1][x - 1] + cost[x - 1][i - 1]);
                     } else
                         System.out.printf("There is no path.%n%n");
                     break;
@@ -219,9 +214,9 @@ public class GraphDemo {
                     int edgesInMST = 0;
                     System.out.printf("Enter the root of the MST: ");
                     console = new Scanner(System.in);
-                    j = console.nextInt();
+                    x = console.nextInt();
                     int[] mst = new int[(int) g.size()];
-                    double totalWt = primMST(g, j, mst);
+                    double totalWt = primMST(g, x, mst);
                     String cityNameA, cityNameB;
                     System.out.println();
                     for (i = 1; i <= g.size(); i++) {
@@ -371,66 +366,32 @@ public class GraphDemo {
      * @return none.
      */
     private static void floyd(Graph<City> g, double dist[][], int path[][]) throws GraphException {
-//        int i, j, k;
-//        City c1, c2;
-
-//        for (i = 0; i < g.size(); i++) {
-//            c1 = g.retrieveVertex(new City(i + 1));
-//            for (j = 0; j < g.size(); j++) {
-//                c2 = g.retrieveVertex(new City(j + 1));
-//                path[i][j] = 0;
-//                if (i == j) {
-//                    dist[i][j] = 0;
-//                } else if (g.isEdge(c2, c1) == true) {
-//                    dist[i][j] = g.retrieveEdge(c1, c2);
-//                } else {
-//                    dist[i][j] = INFINITY;
-//                }
-//            }
-//        }
-//
-//        for (k = 0; k < g.size(); k++) {
-//            for (i = 0; i < g.size(); i++) {
-//                for (j = 0; j < g.size(); j++) {
-//                    if (dist[i][j] != INFINITY && dist[k][j] != INFINITY) {
-//                        if (dist[i][j] > (dist[i][k] + dist[k][j])) {
-//                            dist[i][j] = dist[i][k] + dist[k][j];
-//                            path[i][j] = k;
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-        if (g.isEmpty()) {
-            throw new GraphException("Empty graph");
-        }
-        int i, j, k;
-        for (i = 1; i <= g.size(); i++) {
-            for (j = 1; j <= g.size(); j++) {
-                if (i == j) {
-                    path[i - 1][j - 1] = j;
-                    dist[i - 1][j - 1] = 0;
-                } else if (g.isEdge(new City(i), new City(j))) {
-                    path[i - 1][j - 1] = j;
-                    dist[i - 1][j - 1] = (int) g.retrieveEdge(new City(i), new City(j));
+        int x, y, z;
+        for (x = 1; x <= g.size(); x++) {
+            for (y = 1; y <= g.size(); y++) {
+                if (x == y) {
+                    path[x - 1][y - 1] = y;
+                    dist[x - 1][y - 1] = 0;
+                } else if (g.isEdge(new City(x), new City(y))) {
+                    path[x - 1][y - 1] = y;
+                    dist[x - 1][y - 1] = (int) g.retrieveEdge(new City(x), new City(y));
                 } else {
-                    dist[i - 1][j - 1] = INFINITY;
-                    path[i - 1][j - 1] = NIL;
+                    dist[x - 1][y - 1] = INFINITY;
+                    path[x - 1][y - 1] = NIL;
                 }
             }
         }
-        for (i = 1; i <= g.size(); i++) {
-            dist[i - 1][i - 1] = 0;
-            path[i - 1][i - 1] = i;
+        for (x = 1; x <= g.size(); x++) {
+            dist[x - 1][x - 1] = 0;
+            path[x - 1][x - 1] = x;
         }
-        for (k = 1; k <= g.size(); k++) {
-            for (i = 1; i <= g.size(); i++) {
-                for (j = 1; j <= g.size(); j++) {
-                    if (dist[i - 1][k - 1] != INFINITY && dist[k - 1][j - 1] != INFINITY
-                            && dist[i - 1][j - 1] > dist[i - 1][k - 1] + dist[k - 1][j - 1]) {
-                        path[i - 1][j - 1] = path[i - 1][k - 1];
-                        dist[i - 1][j - 1] = dist[i - 1][k - 1] + dist[k - 1][j - 1];
+        for (z = 1; z <= g.size(); z++) {
+            for (x = 1; x <= g.size(); x++) {
+                for (y = 1; y <= g.size(); y++) {
+                    if (dist[x - 1][z - 1] != INFINITY && dist[z - 1][y - 1] != INFINITY
+                            && dist[x - 1][y - 1] > dist[x - 1][z - 1] + dist[z - 1][y - 1]) {
+                        path[x - 1][y - 1] = path[x - 1][z - 1];
+                        dist[x - 1][y - 1] = dist[x - 1][z - 1] + dist[z - 1][y - 1];
                     }
                 }
             }
@@ -548,14 +509,9 @@ public class GraphDemo {
                 }
             }
         }
-
-        // Define an instance of the PriorityQueue class that uses the comparator;
-        // Then implement the priority-queue-based Prim's MST algorithm
-
         for (int j = 0; j < numVertices; j++) {
             parent[j] = msTree[j];
         }
-
         return weightOfTree;
     }
 
@@ -570,57 +526,13 @@ public class GraphDemo {
      * @throws GraphException
      */
     private static int getComponents(Graph<City> g, int[] components) throws GraphException {
-        // System.out.println("staring");
-        // int vc = 0, cc = 0, v = 1, w;
-        // components = new int[(int) g.size() + 1];
-        // Function<City,PrintStream> f = aCity -> System.out.printf("%-2d
-        // %-30s%n",aCity.getKey(),aCity.getLabel().trim());
-        // Arrays.fill(components,0);
-        // Stack<Integer> pq = new Stack<>();
-        //// while( vc < g.size()) {
-        //// System.out.println("First while");
-        //// cc++;
-        //// v = 1;
-        // while(vc < g.size() && components[v - 1] == 0){
-        // System.out.println("second while");
-        // v++;
-        // cc++;
-        // pq.add(v);
-        // components[v - 1] = cc;
-        // vc++;
-        // while(!pq.isEmpty()) {
-        // //cc++;
-        // System.out.println("Third while");
-        // w = pq.pop();
-        // for(int j = w + 1; j < g.size(); j++){
-        // if(g.isEdge(new City(w), new City(j)) && components[j-1] == 0){
-        // pq.add(j);
-        // components[j-1] = cc;
-        // cc++;
-        // vc++;
-        // }
-        // }
-        // }
-        // }
-        //
-        // // }
-        // return cc;
-        // }
-
         int vc = 0, cc = 0;
         int w, v = 1;
-        //components = new int[(int) g.size() + 1];
         Arrays.fill(components, 0);
         Queue<Integer> pq = new LinkedList<>();
         while (vc < g.size()) {
             cc++;
             v = 1;
-//        while (components[v] == 0) {
-//            cc++;
-//            v++;
-//            pq.add(v);
-//            components[v - 1] = cc;
-//            vc++;
             while (components[v - 1] != 0) {
                 v++;
             }
@@ -638,37 +550,6 @@ public class GraphDemo {
                 }
             }
         }
-        System.out.println("Method array: " + Arrays.toString(components));
-        // }
         return cc;
-
-//        if (g.isEmpty()) {
-//            throw new GraphException("Empty graph");
-//        }
-//        int count = 0, numVertices = 0;
-//        Queue<Integer> q = new LinkedList<>();
-//        while (numVertices < g.size()) {
-//            count++;
-//            int v = 1;
-//            while (components[v - 1] != 0) {
-//                v++;
-//            }
-//            q.add(v);
-//            components[v - 1] = count;
-//            numVertices++;
-//            while (!q.isEmpty()) {
-//                int r = q.poll();
-//                for (int i = 1 + r; i <= g.size(); i++) {
-//                    if (g.isEdge(new City(r), new City(i)) && components[i - 1] == 0) {
-//                        q.add(i);
-//                        components[i - 1] = count;
-//                        numVertices++;
-//                    }
-//                }
-//            }
-//        }
-//        return count;
-//    }
-
     }
 }

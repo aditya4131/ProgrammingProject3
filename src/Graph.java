@@ -404,11 +404,11 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
 
     @Override
     public boolean isPath(E fromKey, E toKey) {
-        Vertex tmpFrom = first;
+        Vertex initial = first;
         Vertex src = null;
-        while (tmpFrom != null && cmp.compare(fromKey, tmpFrom.data) > 0)
-            tmpFrom = tmpFrom.pNextVertex;
-        if (tmpFrom == null || cmp.compare(fromKey, tmpFrom.data) != 0) {
+        while (initial != null && cmp.compare(fromKey, initial.data) > 0)
+            initial = initial.pNextVertex;
+        if (initial == null || cmp.compare(fromKey, initial.data) != 0) {
             return false;
         }
         /* verify that the dest vertex exists in the graph */
@@ -419,7 +419,7 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
             return false;
         }
         /* locate the src vertex to find the start of our traversal */
-        Vertex walkPtr = tmpFrom;
+        Vertex walkPtr = initial;
         while (walkPtr != null) {
             walkPtr.processed = 0;
             if (walkPtr.data.compareTo(fromKey) == 0) {
@@ -462,9 +462,6 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
             totalCount += First.outDeg;
             First = First.pNextVertex;
         }
-//        if (First == null) {
-//            throw new NullPointerException();
-//        }
         return totalCount;
     }
     /***------------------  END AUGEMENTED METHOD ----------------***/
