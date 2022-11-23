@@ -411,14 +411,12 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
         if (initial == null || cmp.compare(fromKey, initial.data) != 0) {
             return false;
         }
-        /* verify that the dest vertex exists in the graph */
         Vertex tmpTo = first;
         while (tmpTo != null && cmp.compare(toKey, tmpTo.data) > 0)
             tmpTo = tmpTo.pNextVertex;
         if (tmpTo == null || cmp.compare(toKey, tmpTo.data) != 0) {
             return false;
         }
-        /* locate the src vertex to find the start of our traversal */
         Vertex walkPtr = initial;
         while (walkPtr != null) {
             walkPtr.processed = 0;
@@ -427,28 +425,27 @@ public class Graph<E extends Comparable<E>> implements GraphAPI<E> {
             }
             walkPtr = walkPtr.pNextVertex;
         }
-        Stack<Vertex> stack = new Stack<>();
+        Stack<Vertex> dfsStack = new Stack<>();
         Vertex toPtr;
         Edge edgeWalk;
         Vertex tmp;
         walkPtr = src;
-        stack.push(walkPtr);
-        while (!stack.isEmpty()) {
-            tmp = stack.peek();
+        dfsStack.push(walkPtr);
+        while (!dfsStack.isEmpty()) {
+            tmp = dfsStack.peek();
             edgeWalk = tmp.pEdge;
             while (edgeWalk != null) {
                 toPtr = edgeWalk.destination;
                 if (toPtr.processed == 0) {
                     if (toPtr.data.compareTo(toKey) == 0) {
                         return true;
-                    }
-                    toPtr.processed = 1;
-                    stack.push(toPtr);
+                    } toPtr.processed = 1;
+                    dfsStack.push(toPtr);
                     edgeWalk = toPtr.pEdge;
                 } else
                     edgeWalk = edgeWalk.pNextEdge;
             }
-            tmp = stack.pop();
+            tmp = dfsStack.pop();
             tmp.processed = 2;
         }
         return false;

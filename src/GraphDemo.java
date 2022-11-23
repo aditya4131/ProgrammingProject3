@@ -88,6 +88,8 @@ public class GraphDemo {
                                 }
                             }
                         }
+                        System.out.println("Case Array : " + Arrays.toString(components));
+                        System.out.println("\n Number of Components: " + result);
 
 
                         // Add code here to print the list of cities in each component of the graph.
@@ -130,23 +132,6 @@ public class GraphDemo {
                                 g.retrieveVertex(new City(x)).getLabel().trim());
                         System.out.println(
                                 "=========================================================================================");
-                        // Add code here to print each leg of the trip from the source to the
-                        // destination
-                        // using the format below, where the columns are left-aligned and the distances
-                        // are displayed to the nearest hundredths.
-                        // For example:
-                        // Baton Rouge -> New Orleans:
-                        // Baton Rouge -> Gonzales 10.20 mi
-                        // Gonzales -> Metaire 32.00 mi
-                        // Metaire -> New Orleans 7.25 mi
-                        // Distance: 49.75 mi
-                        //
-                        // New Orleans -> Baton Rouge
-                        // New Orleans -> Metaire 8.00 mi
-                        // Metaire -> Gonzales 33.00 mi
-                        // Gonzalen -> Baton Rouge 10.00 mi
-                        // Distance: 51.00 mi
-                        //
 
                         String starting = g.retrieveVertex(new City(i)).getLabel().trim();
                         String ending = g.retrieveVertex(new City(x)).getLabel().trim();
@@ -526,25 +511,23 @@ public class GraphDemo {
      * @throws GraphException
      */
     private static int getComponents(Graph<City> g, int[] components) throws GraphException {
-        int vc = 0, cc = 0;
-        int w, v = 1;
-        Arrays.fill(components, 0);
+        int vc = 0, cc = 0, v = 0, w;
         Queue<Integer> pq = new LinkedList<>();
-        while (vc < g.size()) {
+        while(vc < g.size()) {
             cc++;
             v = 1;
-            while (components[v - 1] != 0) {
+            while(components[v - 1] != 0) {
                 v++;
             }
             pq.add(v);
             components[v - 1] = cc;
             vc++;
-            while (!pq.isEmpty()) {
+            while(!pq.isEmpty()) {
                 w = pq.poll();
-                for (int j = w + 1; j <= g.size(); j++) {
-                    if (g.isEdge(new City(w), new City(j)) && components[j - 1] == 0) {
-                        pq.add(j);
-                        components[j - 1] = cc;
+                for (int i = w + 1; i <= g.size(); i++) {
+                    if(g.isEdge(new City(w), new City(i)) && components[i-1] == 0) {
+                        pq.add(i);
+                        components[ i - 1] = cc;
                         vc++;
                     }
                 }
